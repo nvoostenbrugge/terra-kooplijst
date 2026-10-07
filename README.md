@@ -9,8 +9,8 @@ Het is een losse Django-app naast TerraFlow, zelfde opzet als het sales dashboar
 
 De app heeft **geen eigen login**. TerraFlow zet hem achter de gewone login en geeft bij elk verzoek
 mee wie er kijkt (`X-TerraFlow-User`, `-Name`, `-Admin`) plus een gedeeld geheim (`X-TerraFlow-Secret`).
-Zonder dat geheim weigert de dienst alles behalve `/health/`. De TerraFlow-kant staat in
-`quotes/kooplijst_views.py` van de TerraFlow-repo.
+Zonder dat geheim weigert de dienst alles behalve `/health/`. De TerraFlow-kant staat in deze repo in
+`terraflow/` en wordt door de installatie in TerraFlow gezet (zie hieronder); wijzigingen daaraan dus hier doen.
 
 ## Wie ziet en mag wat
 
@@ -43,17 +43,60 @@ zodat er nooit een inloglink bij een engineer terechtkomt.
 
 ## Installeren en bijwerken op de Mac mini
 
-Niet in Terminal. In de scriptmap van TerraFlow (`deploy/macos`):
+Niet in Terminal, en zonder de TerraFlow-repo vanaf de laptop te pushen.
 
-1. `Update TerraFlow (nieuwe versie ophalen).command` (TerraFlow moet de kooplijst-koppeling kennen)
-2. `10 - Kooplijst installeren.command`
+**Gewone weg: via TerraFlow zelf**
 
-Daarna bijwerken met `Update Kooplijst.command`. Beide roepen `deploy/macos/installeer.sh` uit deze repo aan:
-venv, database, gedeeld geheim in beide `.env`-bestanden, migraties, twee launchd-diensten
-(`nl.terra.kooplijst` en `nl.terra.kooplijst-meldingen`). Opnieuw draaien kan altijd; `.env` en database blijven staan.
+1. Plak de tekst van `terraflow/OPDRACHT-VOOR-TERRAFLOW.md` als opdracht in TerraFlow (adminpaneel, kaart Ontwikkeling).
+   Claude op de testserver zet dan de koppeling in TerraFlow (met `deploy/macos/koppel_terraflow.py` uit deze repo)
+   en maakt het script `10 - Kooplijst installeren.command` in de scriptmap van TerraFlow.
+2. Beoordelen, goedkeuren en uitrollen zoals elke opdracht.
+3. Op de productie-Mac: dubbelklik `10 - Kooplijst installeren.command`. Die haalt deze repo naar
+   `/Users/Shared/terra-kooplijst` en draait `Kooplijst installeren.command` hieruit. De koppeling staat er dan al,
+   dus het script installeert alleen de dienst.
 
-Logboek: `/var/log/terraflow/kooplijst.log` en `kooplijst-meldingen.log`. De database zit in de dagelijkse
-backup van TerraFlow (`kooplijst.dump`).
+**Reserve: rechtstreeks op de Mac** (als de weg via TerraFlow niet kan; het script zet de koppeling er dan zelf bij)
+
+1. Op de Mac mini in de browser: deze repo openen, groene knop **Code**, **Download ZIP**. Dubbelklik de zip in Downloads.
+2. In de uitgepakte map: `deploy/macos`, rechtsklik op **Kooplijst installeren.command**, **Open**
+   (macOS vraagt bij een gedownload script eenmalig om bevestiging; op macOS 15 en nieuwer staat die bevestiging onder
+   Systeeminstellingen, Privacy en beveiliging, "Open toch").
+3. Het script vraagt het wachtwoord van de Mac en later één keer of de koppeling in TerraFlow mag komen (Enter = ja).
+
+Wat het script doet:
+
+- code naar de vaste plek `/Users/Shared/terra-kooplijst` (git clone; lukt dat niet, dan wordt de download gekopieerd);
+- Python-omgeving, eigen database `terra_kooplijst`, gedeeld geheim in beide `.env`-bestanden, migraties;
+- **koppeling in TerraFlow** (`/opt/terraflow`), met `deploy/macos/koppel_terraflow.py`:
+  `quotes/kooplijst_views.py` en `quotes/test_kooplijst.py` (kopie uit `terraflow/` van deze repo), drie routes in
+  `quotes/urls.py`, twee instellingen in `terra_quotes/settings.py`, de knop in `quotes/services/project_helpers.py`
+  en de kooplijst-database in `deploy/macos/backup.sh`. Er wordt alleen toegevoegd, op een herkenbare plek. Is zo'n
+  plek er niet, dan stopt het script zonder iets te wijzigen;
+- controle: `manage.py check` en de zeven tests van de koppeling. Slaagt een van beide niet, dan gaat alles terug
+  naar hoe het was (kopie in `.koppeling-backup/`) en blijft TerraFlow ongewijzigd;
+- de wijziging wordt op de Mac in de git-geschiedenis van TerraFlow vastgelegd (één commit). TerraFlow toont daarna
+  "1 niet op GitHub"; **Push naar GitHub.command** op de Mac stuurt hem naar de Mac-repo;
+- twee launchd-diensten (`nl.terra.kooplijst` en `nl.terra.kooplijst-meldingen`) en een herstart van TerraFlow
+  (de site is een paar tellen weg; kies een rustig moment).
+
+**Daarna**, in `/Users/Shared/terra-kooplijst/deploy/macos`:
+
+- `Update Kooplijst.command`: nieuwe versie ophalen en herstarten. Na een installatie vanuit een download
+  (geen git clone) is bijwerken: opnieuw de ZIP downloaden en daarin weer `Kooplijst installeren.command`.
+- `Status Kooplijst.command`: draait hij, is hij bereikbaar, staat de koppeling er.
+
+Opnieuw draaien kan altijd; `.env`, database en rechten blijven staan.
+
+Logboek: `/var/log/terraflow/kooplijst.log` en `kooplijst-meldingen.log`. De database gaat mee in de nachtelijke
+backup van TerraFlow (`config/kooplijst/kooplijst.dump`, plus de `.env`). Terugzetten gaat niet vanzelf met
+"Herstel vanaf backup": dat is `pg_restore` van die dump in de database `terra_kooplijst`.
+
+Koppeling weer uit TerraFlow halen: `python3 deploy/macos/koppel_terraflow.py terug /opt/terraflow <map in .koppeling-backup>`
+(of de commit in `/opt/terraflow` terugdraaien) en TerraFlow herstarten.
+
+## Van de laptop naar GitHub
+
+`EERSTE-KEER-NAAR-GITHUB.bat` (eenmalig) en daarna `PUSH.bat`. Die pushen alleen deze map.
 
 ## Eerste keer gebruiken
 

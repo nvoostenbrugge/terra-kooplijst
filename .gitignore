@@ -6,3 +6,4 @@ db.sqlite3*
 staticfiles/
 logs/
 .DS_Store
+.koppeling-backup/

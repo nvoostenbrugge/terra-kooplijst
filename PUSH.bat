@@ -9,6 +9,7 @@ REM Daarna op de Mac mini: "Update Kooplijst.command".
 git rev-parse --is-inside-work-tree >nul 2>&1 || ( color 0C & echo XX Nog geen git-map: eerst EERSTE-KEER-NAAR-GITHUB.bat & pause & exit /b 1 )
 
 git add -A
+git add --chmod=+x -- "deploy/macos/*.command" "deploy/macos/*.sh"
 git diff --cached --quiet 2>nul
 if not errorlevel 1 goto push
 
