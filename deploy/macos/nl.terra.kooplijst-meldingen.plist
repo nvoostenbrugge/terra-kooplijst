@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Terra Kooplijst: elk kwartier de gebundelde pushmeldingen (nieuwe aanvragen, langer dan 2 werkdagen
+       wachten, bestelronde gemist). Het commando doet zelf niets buiten werkdagen 8-18 uur. -->
+  <key>Label</key><string>nl.terra.kooplijst-meldingen</string>
+  <key>UserName</key><string>__APP_USER__</string>
+  <key>WorkingDirectory</key><string>__KOOP_DIR__</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__KOOP_DIR__/venv/bin/python</string>
+    <string>__KOOP_DIR__/manage.py</string>
+    <string>kooplijst_meldingen</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONIOENCODING</key><string>utf-8</string>
+    <key>PYTHONUNBUFFERED</key><string>1</string>
+  </dict>
+  <key>StartInterval</key><integer>900</integer>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/var/log/terraflow/kooplijst-meldingen.log</string>
+  <key>StandardErrorPath</key><string>/var/log/terraflow/kooplijst-meldingen.log</string>
+</dict>
+</plist>

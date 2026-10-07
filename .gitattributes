@@ -1,0 +1,11 @@
+# Regeleinden vastleggen zodat de scripts op de Mac mini werken, ook als er vanaf Windows gepusht wordt.
+* text=auto
+*.sh    text eol=lf
+*.plist text eol=lf
+*.py    text eol=lf
+*.html  text eol=lf
+*.js    text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.bat   text eol=crlf

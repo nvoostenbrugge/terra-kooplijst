@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kooplijst · TerraFlow</title>
+<link rel="icon" href="/static/icons/browser/favicon.ico">
+<link rel="stylesheet" href="static/inkoop/app.css?v={{ versie }}">
+</head>
+<body>
+<div class="wrap">
+  <div class="kop">
+    <div class="titelblok">
+      <a class="terug" href="/">&larr; TerraFlow</a>
+      <h1>Kooplijst</h1>
+    </div>
+    <div class="kop-acties">
+      <select id="wie" class="stil" aria-label="Toon aanvragen van" hidden><option value="">Iedereen</option></select>
+      <button class="btn stil" id="momenten" type="button" hidden>Bestelmomenten</button>
+      <button class="btn stil" id="beheer" type="button" hidden>Beheer</button>
+      <button class="btn hoofd" id="nieuw" type="button">+ Bestelling</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="melding" id="melding" hidden></div>
+  <div id="view" class="stapel"><div class="leeg">Kooplijst laden…</div></div>
+</div>
+
+<dialog id="dlg-regel">
+  <form class="form" id="form-regel">
+    <h2 id="dlg-titel">Nieuwe bestelling</h2>
+    <label>Link naar het artikel
+      <input id="f-link" type="text" inputmode="url" placeholder="https://…" autocomplete="off">
+    </label>
+    <label>Omschrijving
+      <input id="f-omschrijving" type="text" required autocomplete="off">
+    </label>
+    <div class="rij">
+      <label>Aantal
+        <input id="f-aantal" type="number" min="1" step="1" value="1" required>
+      </label>
+      <label>Stuks per verpakking
+        <input id="f-per" type="number" min="1" step="1" value="1">
+      </label>
+      <label>Totaalprijs in euro
+        <input id="f-prijs" type="text" inputmode="decimal" placeholder="0,00">
+      </label>
+    </div>
+    <label>Project
+      <input id="f-project" type="text" list="projecten" autocomplete="off">
+      <datalist id="projecten"></datalist>
+    </label>
+    <label>Opmerking (variant, kleur, maat)
+      <input id="f-opmerking" type="text" autocomplete="off">
+    </label>
+    <div class="rij" id="f-staf-rij" hidden>
+      <label>Aangevraagd door
+        <select id="f-aanvrager"></select>
+      </label>
+      <label>Status
+        <select id="f-status"></select>
+      </label>
+      <label>Factuurnummer
+        <input id="f-factuur" type="text" autocomplete="off">
+      </label>
+    </div>
+    <label class="rijvink"><input id="f-spoed" type="checkbox"> Spoed</label>
+    <div class="fout" id="f-fout" hidden></div>
+    <div class="knoppen">
+      <button class="btn" type="button" data-sluit="dlg-regel">Annuleren</button>
+      <button class="btn hoofd" type="submit" id="f-opslaan">Aanvragen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-momenten">
+  <form class="form" id="form-momenten">
+    <h2>Bestelmomenten</h2>
+    <p class="sub">Op deze dagen is er een bestelronde. Wat dan goedgekeurd klaarstaat en niet besteld wordt, geeft een melding.</p>
+    <div class="dagen" id="m-dagen"></div>
+    <div class="rij">
+      <label>Winkelwagens vullen om
+        <select id="m-vul"></select>
+      </label>
+      <label>Bestelronde om
+        <select id="m-ronde"></select>
+      </label>
+    </div>
+    <p class="sub">Het vulmoment geldt zodra de Claude-taak op de pc van de besteller is ingesteld.</p>
+    <div class="fout" id="m-fout" hidden></div>
+    <div class="knoppen">
+      <button class="btn" type="button" data-sluit="dlg-momenten">Annuleren</button>
+      <button class="btn hoofd" type="submit">Opslaan</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-beheer">
+  <div class="form">
+    <h2>Beheer</h2>
+    <h3>Wie mag wat</h3>
+    <p class="sub">Iedereen kan aanvragen en ziet alleen zijn eigen aanvragen. Wie mag goedkeuren of bestellen ziet de hele lijst. Super-admins van TerraFlow mogen alles.</p>
+    <div id="b-team" class="stapel"></div>
+    <div class="rij">
+      <label>Collega toevoegen die de kooplijst nog niet geopend heeft
+        <input id="b-email" type="email" placeholder="naam@terra-inspectioneering.com" autocomplete="off">
+      </label>
+    </div>
+    <div class="knoppen"><button class="btn klein" type="button" id="b-voegtoe">Toevoegen</button></div>
+
+    <div id="b-namen-blok" hidden>
+      <h3>Namen uit de oude kooplijst</h3>
+      <p class="sub">Koppel een naam aan een collega, dan ziet die zijn eigen regels en krijgt hij de meldingen.</p>
+      <div id="b-namen" class="stapel"></div>
+    </div>
+
+    <h3>Oude kooplijst inladen</h3>
+    <p class="sub">Kies het Excel-bestand (Order Sheet). Alleen wat nog openstaat komt mee; twee keer inladen maakt geen dubbelen.</p>
+    <input id="b-bestand" type="file" accept=".xlsx">
+    <div class="knoppen">
+      <button class="btn klein" type="button" id="b-proef">Proefdraai</button>
+      <button class="btn klein hoofd" type="button" id="b-inladen">Inladen</button>
+    </div>
+    <div class="uitkomst" id="b-uitkomst"></div>
+    <div class="fout" id="b-fout" hidden></div>
+    <div class="knoppen"><button class="btn" type="button" data-sluit="dlg-beheer">Sluiten</button></div>
+  </div>
+</dialog>
+
+<dialog id="dlg-kopie">
+  <div class="form">
+    <h2>Kopieer deze tekst</h2>
+    <p class="sub">Automatisch kopiëren lukte niet. Selecteer de tekst en kopieer hem zelf.</p>
+    <textarea id="kopie-tekst" readonly></textarea>
+    <div class="knoppen"><button class="btn" type="button" data-sluit="dlg-kopie">Sluiten</button></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" hidden role="status"></div>
+<script src="static/inkoop/app.js?v={{ versie }}"></script>
+</body>
+</html>

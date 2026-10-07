@@ -1,0 +1,8 @@
+# Zelfde versies als TerraFlow waar ze overlappen (Mac mini: Python 3.12)
+Django==4.2.27
+python-decouple==3.8
+psycopg2-binary==2.9.11
+gunicorn==23.0.0
+whitenoise==6.9.0
+requests==2.32.5
+openpyxl==3.1.5
